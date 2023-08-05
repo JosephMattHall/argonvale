@@ -1,0 +1,5 @@
+/.env
+/_pycache
+/.vscode
+/env
+backup_app.txt
