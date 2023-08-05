@@ -1,0 +1,80 @@
+import os
+from hashlib import sha256
+import jwt
+from sanic import Sanic, response
+import motor.motor_asyncio
+from dotenv import load_dotenv
+
+load_dotenv()
+
+MONGODB_HOST = os.getenv("MONGODB_HOST")
+MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
+MONGODB_DBNAME = os.getenv("MONGODB_DBNAME")
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+app = Sanic("myapp")
+db = None
+
+
+async def create_user(data):
+    hashed_password = sha256(data["password"].encode()).hexdigest()
+    user = {
+        "username": data["username"],
+        "password": hashed_password,
+    }
+    await db.users.insert_one(user)
+
+
+@app.route("/auth/register", methods=["POST"])
+async def register(request):
+    data = request.json
+    existing_user = await db.users.find_one({"username": data["username"]})
+    if existing_user:
+        return response.json({"error": "User already exists"}, status=400)
+
+    await create_user(data)
+    return response.json({"message": "User registered successfully"}, status=201)
+
+
+@app.route("/auth/login", methods=["POST"])
+async def login(request):
+    data = request.json
+    user = await db.users.find_one({"username": data["username"]})
+    if not user:
+        return response.json({"error": "Invalid credentials"}, status=401)
+
+    hashed_password = sha256(data["password"].encode()).hexdigest()
+    if user["password"] != hashed_password:
+        return response.json({"error": "Invalid credentials"}, status=401)
+
+    payload = {"username": user["username"]}
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+    return response.json({"access_token": token})
+
+
+@app.route("/protected-route", methods=["GET"])
+async def protected_route(request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return response.json({"error": "Unauthorized"}, status=401)
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return response.json({"error": "Token has expired"}, status=401)
+    except jwt.InvalidTokenError:
+        return response.json({"error": "Invalid token"}, status=401)
+
+    return response.json({"message": "Protected route accessed successfully"})
+
+
+@app.listener("before_server_start")
+async def setup_app(app, loop):
+    global db
+    client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_HOST, MONGODB_PORT)
+    db = client[MONGODB_DBNAME]
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
