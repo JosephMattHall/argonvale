@@ -6,6 +6,7 @@ from sanic import Sanic, response
 import motor.motor_asyncio
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+import secrets
 
 load_dotenv()
 
@@ -16,6 +17,17 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 app = Sanic("myapp")
 db = None
+
+salt = secrets.token_bytes(32)
+
+"""
+TODO: salt password
+
+salted_password = salt + password.encode()
+hashed_password = sha256(salted_password).hexdigest()
+
+
+"""
 
 # Models
 
