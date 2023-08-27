@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoints</title>
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            background-color: #8db3d2;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            height: 50px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .api-description {
+            font-size: 18px;
+        }
+
+        .top-bar {
+            background-color: #2d4f6c;
+            height: 75px;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            color: #d7e4f1;
+            font-size: 32px;
+            padding: 10px;
+            text-align: center;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <h1 class="page-title">API Endpoints</h1>
+    </div>
+
+    <div class="container mt-5">
+        <!-- User Registration & Login -->
+        <div class="section-title">User Registration & Login</div>
+        <pre class="api-description">
+Endpoint: /auth/register
+Method: POST
+Purpose: Allows users to register by providing a username and password.
+
+Endpoint: /auth/login
+Method: POST
+Purpose: Allows users to log in by providing their username and password. Returns an access token upon successful login, which should be used for authentication in subsequent requests.
+        </pre>
+
+        <!-- Companion functionality -->
+        <div class="section-title mt-4">Companion Functionality</div>
+        <pre class="api-description">
+Endpoint: /companion/create
+Method: POST
+Purpose: Allows users to create a companion associated with their account. Requires an authentication token in the request header (Authorization: Bearer &lt;access_token&gt;).
+                    
+Endpoint: /companion/companion_id
+Method: Get
+Purpose: Allows users to retreive a companions data.  Requires an authentication token in the request header (Authorization: Bearer &lt;access_token&gt;).
+    
+        </pre>
+
+        <!-- Companion Training -->
+        <div class="section-title mt-4">Companion Training</div>
+        <pre class="api-description">
+Endpoint: /companion/training_status
+Method: GET
+Purpose: Allows users to check the training status of their companions. Requires an authentication token in the request header (Authorization: Bearer &lt;access_token&gt;).
+
+Endpoint: /companion/start_training/&lt;companion_id&gt;
+Method: POST
+Purpose: Allows users to enroll a companion into a training course. The course duration will be calculated based on the companion's level and training requirements.
+
+Endpoint: /companion/finish_training/&lt;companion_id&gt;
+Method: POST
+Purpose: Marks the completion of the training course for a companion. This endpoint should be triggered automatically after the course duration has passed, or when the user manually finishes the course.
+        </pre>
+
+        <!-- Matchmaking -->
+        <div class="section-title mt-4">Matchmaking</div>
+        <pre class="api-description">
+Endpoint: /matchmaking
+Method: POST
+Purpose: Allows users to search for opponents based on specified ranges of companion stats for battling.
+        </pre>
+
+        <!-- Items and Inventory -->
+        <div class="section-title mt-4">Items and Inventory</div>
+        <pre class="api-description">
+Endpoint: /items
+Method: GET
+Purpose: Allows users to view their inventory of items.
+
+Endpoint: /items/equip/&lt;item_id&gt;
+Method: POST
+Purpose: Allows users to equip a weapon from the armory to a companion.
+
+Endpoint: /items/unequip/&lt;item_id&gt;
+Method: POST
+Purpose: Allows users to unequip a weapon from a companion and move it back to the inventory.
+
+Endpoint: /armory
+Method: GET
+Purpose: Allows users to view their armory where only weapons are stored.
+
+Endpoint: /armory/move_to_inventory/&lt;item_id&gt;
+Method: POST
+Purpose: Allows users to move a weapon from the armory back to the inventory.
+        </pre>
+
+        <!-- Battling -->
+        <div class="section-title mt-4">Battling</div>
+        <pre class="api-description">
+Endpoint: /battle/start
+Method: POST
+Purpose: Initiates a real-time turn-based battle between two users' companions using websockets.
+
+Endpoint: /battle/status
+Method: GET
+Purpose: Allows users to check the status of an ongoing battle.
+
+Endpoint: /battle/finish
+Method: POST
+Purpose: Ends an ongoing battle and determines the winner.
+        </pre>
+
+        <!-- User Profile and Companions -->
+        <div class="section-title mt-4">User Profile and Companions</div>
+        <pre class="api-description">
+Endpoint: /profile/&lt;user_id&gt;
+Method: GET
+Purpose: Allows users to view another user's profile and their companions.
+
+Endpoint: /companions/&lt;companion_name&gt;
+Method: GET
+Purpose: Allows users to view a companion.
+
+Endpoint: /profile/edit
+Method: PUT
+Purpose: Allows users to edit their own profile information.
+
+Endpoint: /profile
+Method: PUT
+Purpose: Allows users to view their own profile.
+        </pre>
+
+        <!-- Chat Area -->
+        <div class="section-title mt-4">Chat Area</div>
+        <pre class="api-description">
+Endpoint: /chat/boards
+Method: GET
+Purpose: Allows users to view available boards for creating and viewing posts.
+
+Endpoint: /chat/posts/&lt;board_id&gt;
+Method: GET
+Purpose: Allows users to view posts within a specific board.
+
+Endpoint: /chat/posts/create
+Method: POST
+Purpose: Allows users to create a post in a specific board.
+
+Endpoint: /chat/posts/&lt;post_id&gt;/replies
+Method: GET
+Purpose: Allows users to view replies to a specific post.
+
+Endpoint: /chat/posts/&lt;post_id&gt;/replies/create
+Method: POST
+Purpose: Allows users to create a reply to a specific post.
+        </pre>
+    </div>
+
+    <!-- Bootstrap JS CDN (optional, for enhanced functionality) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

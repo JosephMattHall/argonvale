@@ -1,0 +1,6 @@
+.env
+/__pycache__
+.vscode
+pyenv
+backup_app.txt
+test.py
