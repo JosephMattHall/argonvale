@@ -264,7 +264,7 @@ async def training_status(request):
 
     return response.json({"training_status": training_status})
 
-
+#example of how to protect a route for auth users only
 @app.route("/protected-route", methods=["GET"])
 async def protected_route(request):
     auth_header = request.headers.get("Authorization")

@@ -2,5 +2,6 @@
 /__pycache__
 .vscode
 pyenv
+env
 backup_app.txt
 test.py
