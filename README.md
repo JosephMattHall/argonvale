@@ -1,2 +1,2 @@
-# third
- Backend for the game Argonvale Adventures - Battlegrounds. 
+# Argonvale
+ Backend for the game Argonvale - Battlegrounds. 
