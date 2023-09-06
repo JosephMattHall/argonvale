@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime,timedelta
 import os
 from hashlib import sha256
 import jwt
@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 from bson.objectid import ObjectId
 import secrets
 import math
-
+from bson import ObjectId
+import random
 load_dotenv()
 
 MONGODB_HOST = os.getenv("MONGODB_HOST")
@@ -33,7 +34,8 @@ hashed_password = sha256(salted_password).hexdigest()
 # Models
 
 class Companion:
-    def __init__(self, user_id, name, level, strength, defense, speed, HP, image, type):
+    def __init__(self, id, user_id, name, level, strength, defense, speed, HP, image, type):
+        self.id = id
         self.user_id = user_id
         self.name = name
         self.level = level
@@ -72,7 +74,11 @@ def get_user_id_from_token(authorization_header):
         return None
 
 async def create_companion(data, user_id):
+    # Generate a unique ID as a string
+    companion_id = str(ObjectId())
+    
     companion = Companion(
+        id=companion_id,  # Use "id" instead of "_id"
         user_id=user_id,
         name=data["name"],
         level=1,
@@ -83,7 +89,12 @@ async def create_companion(data, user_id):
         image=data["image"],
         type=data["type"]
     )
+    
+    # Insert the companion document into the database
     await db.companions.insert_one(companion.__dict__)
+
+    # Return the companion's _id
+    return companion_id
 
 async def create_user(data):
     hashed_password = sha256(data["password"].encode()).hexdigest()
@@ -145,8 +156,8 @@ async def create_companion_route(request):
     if existing_companion:
         return response.json({"error": "Companion name already exists"}, status=400)
 
-    await create_companion(data, user_id)
-    return response.json({"message": "Companion created successfully"}, status=201)
+    companion_id = await create_companion(data, user_id)
+    return response.json({"companion_id": companion_id}, status=201)
 
 # Helper function to start a training course for a companion
 @app.put("/companion/start_training/<companion_id>")
@@ -158,7 +169,8 @@ async def start_training_course(request, companion_id):
         return response.json({"error": "Unauthorized"}, status=401)
 
     # Check if the companion belongs to the user
-    companion = await db.companions.find_one({"_id": ObjectId(companion_id), "user_id": user_id})
+    companion = await db.companions.find_one({"id": companion_id, "user_id": user_id})
+
     if not companion:
         return response.json({"error": "Companion not found or does not belong to the user"}, status=404)
 
@@ -168,14 +180,17 @@ async def start_training_course(request, companion_id):
 
     # Check if the chosen_stat is valid (should be one of "strength", "defense", or "speed")
     chosen_stat = request.json.get("chosen_stat")
-    if chosen_stat not in ["strength", "defense", "speed"]:
+    if chosen_stat not in ["strength", "defense", "speed", "level"]:
         return response.json({"error": "Invalid chosen_stat"}, status=400)
 
     # Calculate the training duration based on the companion's level
     training_duration = calculate_training_duration(companion["level"])
 
     # Calculate the training end time
-    training_end_time = datetime.utcnow() + datetime.timedelta(seconds=training_duration)
+    training_end_time = datetime.utcnow() + timedelta(seconds=training_duration)
+    
+    # Convert the training_end_time to a string in ISO 8601 format
+    training_end_time = training_end_time.isoformat()
 
     # Update the companion document with the training_end_time and chosen_stat
     await db.companions.update_one(
@@ -245,7 +260,7 @@ async def training_status(request):
     if not user_id:
         return response.json({"error": "User ID not found in token"}, status=401)
 
-    companions = await db.companions.find({"user_id": user_id}).to_list(None)
+    companions = await db.companions.find({"user_id": user_id}).to_list(1)
 
     training_status = {}
     for companion in companions:
@@ -288,6 +303,8 @@ async def setup_app(app, loop):
     client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_HOST, MONGODB_PORT)
     db = client[MONGODB_DBNAME]
     await db.companions.create_index("name", unique=True)
+
+
 
 
 if __name__ == "__main__":
