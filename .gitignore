@@ -5,3 +5,4 @@ pyenv
 env
 backup_app.txt
 test2.py
+.env
