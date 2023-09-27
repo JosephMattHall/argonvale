@@ -1,8 +1,5 @@
 .env
-/__pycache__
-.vscode
 pyenv
-env
-backup_app.txt
-test2.py
-.env
+.gitattributes
+test
+routes/__pycache__
